@@ -6,12 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var Status string = "green"
+
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
 	r.GET("/ping", ping)
-	r.GET("/example/healthiness", exampleHealthiness)
+	r.GET("/example/healthiness", getExampleHealthiness)
+	r.POST("/example/healthiness", postExampleHealthiness)
 	r.Run("localhost:8080")
 }
 
@@ -21,22 +24,31 @@ func ping(c *gin.Context) {
 	})
 }
 
-func exampleHealthiness(c *gin.Context) {
-	type hint struct {
-		Name_value string `json:"name_value"`
-		Key_value  string `json:"key_value"`
+func getExampleHealthiness(c *gin.Context) {
+	type HINTS struct {
+		Key string `json:"key"`
+		Value  string `json:"value"`
 	}
-	var hints = []hint{
+	var hints = []HINTS{
 		{
-			Name_value: "Bezeichnung der Informationen",
-			Key_value:  "weitere informationen",
+			Key: "Bezeichnung der Informationen",
+			Value:  "weitere informationen",
 		},
 	}
-	var status string = "green"
-	
+
 	c.PureJSON(200, gin.H{
-		"status":    status,
+		"status":    Status,
 		"timestamp": time.Now().Format(time.RFC3339),
 		"hints":     hints,
 	})
+}
+
+func postExampleHealthiness(c *gin.Context) {
+	type STATUS struct {
+		HEALTHINESSSTATUS string `json:"healthinessStatus"`
+	}
+
+	var status STATUS
+	c.BindJSON(&status)
+	c.JSON(200, gin.H{"status": status.HEALTHINESSSTATUS})
 }
